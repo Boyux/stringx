@@ -17,7 +17,13 @@ func WithCapacity(capacity int) String {
 func From(in string) String {
 	// convert input to bytes, there is a faster way by using
 	// unsafe.Pointer, which is not recommended
-	mem := stringToBytes(in)
+	//
+	// SAFETY
+	// because String is a mutable type, so String.mem should
+	// also be mutable. However, byte slice converted by unsafe
+	// function stringToBytes is immutable, mutating those bytes
+	// would cause 'unexpected fault address' error
+	mem := []byte(in)
 
 	return String{
 		mem: mem,
