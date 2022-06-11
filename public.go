@@ -2,6 +2,8 @@ package st
 
 import (
 	"bytes"
+	"unicode"
+	"unicode/utf8"
 )
 
 func (s *String) Bytes() []byte {
@@ -209,4 +211,50 @@ func (s *String) ReplaceToNew(from, to string) String {
 		len: len(mem),
 		cap: len(mem),
 	}
+}
+
+// TrimSpaceSlow benchmark: 90.12 ns/op
+func (s *String) TrimSpaceSlow() {
+	tgt := bytes.TrimSpace(s.payload())
+	s.mem = tgt
+	s.len = len(tgt)
+	s.cap = len(tgt)
+}
+
+var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
+
+// TrimSpace benchmark: 72.55 ns/op
+func (s *String) TrimSpace() {
+	var start, stop int
+	for ; start < s.len; start++ {
+		c := s.Get(start)
+		if c >= utf8.RuneSelf {
+			s.trim(unicode.IsSpace)
+			return
+		}
+		if asciiSpace[c] == 0 {
+			break
+		}
+	}
+
+	stop = s.len
+	for ; stop > start; stop-- {
+		c := s.Get(stop - 1)
+		if c >= utf8.RuneSelf {
+			s.trim(unicode.IsSpace)
+			return
+		}
+		if asciiSpace[c] == 0 {
+			break
+		}
+	}
+
+	if start == stop {
+		s.len = 0
+		return
+	}
+
+	payload := s.payload()
+	copy(payload, payload[start:stop])
+	s.len = stop - start
 }

@@ -10,7 +10,7 @@ func testStringReplace(t *testing.T, data []string) {
 	before := str.Clone()
 	str.Replace(from, to)
 	if !str.EqualToString(exp) {
-		t.Errorf("replacing String failed: before=%s after=%s old=%s new=%s expected=%s\n",
+		t.Errorf("String: replacing pattern failed: before=%s after=%s old=%s new=%s expect=%s\n",
 			before.String(), str.String(), from, to, exp)
 	}
 }
@@ -26,7 +26,6 @@ var replaceData = [][]string{
 }
 
 func TestString_Replace(t *testing.T) {
-
 	for _, data := range replaceData {
 		testStringReplace(t, data)
 	}
@@ -55,6 +54,62 @@ func BenchmarkStdReplace(b *testing.B) {
 		for _, data := range replaceData {
 			str, from, to := data[0], data[1], data[2]
 			str = strings.ReplaceAll(str, from, to)
+		}
+	}
+}
+
+func testStringTrimSpace(t *testing.T, data []string) {
+	str, exp := From(data[0]), data[1]
+	before := str.Clone()
+	str.TrimSpace()
+	if !str.EqualToString(exp) {
+		t.Errorf("String: triming space failed: before=%s after=%s expect=%s\n",
+			before.String(), str.String(), exp)
+	}
+}
+
+func testStringTrimSpaceSlow(t *testing.T, data []string) {
+	str, exp := From(data[0]), data[1]
+	before := str.Clone()
+	str.TrimSpaceSlow()
+	if !str.EqualToString(exp) {
+		t.Errorf("String: triming space failed: before=%s after=%s expect=%s\n",
+			before.String(), str.String(), exp)
+	}
+}
+
+var trimSpaceData = [][]string{
+	{"\t\n\r     ", ""},
+	{"\t aaa \n", "aaa"},
+	{"\t 你好世界 \n", "你好世界"},
+}
+
+func TestString_TrimSpace(t *testing.T) {
+	for _, data := range trimSpaceData {
+		testStringTrimSpace(t, data)
+	}
+}
+
+func TestString_TrimSpaceSlow(t *testing.T) {
+	for _, data := range trimSpaceData {
+		testStringTrimSpaceSlow(t, data)
+	}
+}
+
+func BenchmarkString_TrimSpace(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimSpaceData {
+			str := From(data[0])
+			str.TrimSpace()
+		}
+	}
+}
+
+func BenchmarkStdTrimSpace(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimSpaceData {
+			str := data[0]
+			str = strings.TrimSpace(str)
 		}
 	}
 }
