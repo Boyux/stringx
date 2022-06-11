@@ -139,8 +139,7 @@ func (s *String) CompareToString(str string) int {
 }
 
 func (s *String) Contains(sub string) bool {
-	b := stringToBytes(sub)
-	return bytes.Contains(s.payload(), b)
+	return bytes.Contains(s.payload(), stringToBytes(sub))
 }
 
 func (s *String) StartsWith(pat string) bool {

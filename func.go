@@ -23,7 +23,7 @@ func From(in string) String {
 	// also be mutable. However, byte slice converted by unsafe
 	// function stringToBytes is immutable, mutating those bytes
 	// would cause 'unexpected fault address' error
-	mem := []byte(in)
+	mem := stringToBytesSlow(in)
 
 	return String{
 		mem: mem,

@@ -21,7 +21,16 @@ func (s *String) Scan(src any) error {
 	}
 
 	if str, ok := src.(string); ok {
-		mem := stringToBytes(str)
+		mem := stringToBytesSlow(str)
+		s.mem = mem
+		s.len = len(mem)
+		s.cap = len(mem)
+		return nil
+	}
+
+	if bytes, ok := src.([]byte); ok {
+		mem := make([]byte, len(bytes))
+		copy(mem, bytes)
 		s.mem = mem
 		s.len = len(mem)
 		s.cap = len(mem)
