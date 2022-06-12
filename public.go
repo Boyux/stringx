@@ -10,6 +10,17 @@ func (s *String) Bytes() []byte {
 	return s.payload()
 }
 
+func (s *String) Runes() *Runes {
+	return &Runes{
+		mem: s.payload(),
+		idx: 0,
+	}
+}
+
+func (s *String) RuneSlice() []rune {
+	return s.Runes().Consume()
+}
+
 func (s *String) String() string {
 	return s.toString()
 }
@@ -147,15 +158,17 @@ func (s *String) StartsWith(pat string) bool {
 	return bytes.Equal(s.mem[0:len(b)], b)
 }
 
-func (s *String) Split(sep string) []String {
-	subslices := bytes.Split(s.payload(), stringToBytes(sep))
-
-	output := make([]String, 0, len(subslices))
-	for _, slice := range subslices {
-		output = append(output, FromBytes(slice))
+func (s *String) Split(sep string) *Split {
+	return &Split{
+		mem:        s.payload(),
+		idx:        0,
+		sep:        stringToBytes(sep),
+		cacheIndex: -1,
 	}
+}
 
-	return output
+func (s *String) SplitSlice(sep string) []String {
+	return s.Split(sep).Consume()
 }
 
 func (s *String) Find(pat string) int {
