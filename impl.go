@@ -1,6 +1,7 @@
 package st
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -28,9 +29,9 @@ func (s *String) Scan(src any) error {
 		return nil
 	}
 
-	if bytes, ok := src.([]byte); ok {
-		mem := make([]byte, len(bytes))
-		copy(mem, bytes)
+	if b, ok := src.([]byte); ok {
+		mem := make([]byte, len(b))
+		copy(mem, b)
 		s.mem = mem
 		s.len = len(mem)
 		s.cap = len(mem)
@@ -41,11 +42,85 @@ func (s *String) Scan(src any) error {
 }
 
 func (s *String) MarshalJSON() ([]byte, error) {
-	dst := make([]byte, s.len+2)
-	copy(dst[1:len(dst)-1], s.payload())
-	dst[0] = '"'
-	dst[len(dst)-1] = '"'
-	return dst, nil
+	return encodeJSON(s.payload()), nil
+}
+
+var hex = "0123456789abcdef"
+
+// encodeJSON copy from encoding/json/encode.go encodeState.stringBytes
+func encodeJSON(s []byte) []byte {
+	var e bytes.Buffer
+
+	e.WriteByte('"')
+	start := 0
+	for i := 0; i < len(s); {
+		if b := s[i]; b < utf8.RuneSelf {
+			if htmlSafeSet[b] {
+				i++
+				continue
+			}
+			if start < i {
+				e.Write(s[start:i])
+			}
+			e.WriteByte('\\')
+			switch b {
+			case '\\', '"':
+				e.WriteByte(b)
+			case '\n':
+				e.WriteByte('n')
+			case '\r':
+				e.WriteByte('r')
+			case '\t':
+				e.WriteByte('t')
+			default:
+				// This encodes bytes < 0x20 except for \t, \n and \r.
+				// If escapeHTML is set, it also escapes <, >, and &
+				// because they can lead to security holes when
+				// user-controlled strings are rendered into JSON
+				// and served to some browsers.
+				e.WriteString(`u00`)
+				e.WriteByte(hex[b>>4])
+				e.WriteByte(hex[b&0xF])
+			}
+			i++
+			start = i
+			continue
+		}
+		c, size := utf8.DecodeRune(s[i:])
+		if c == utf8.RuneError && size == 1 {
+			if start < i {
+				e.Write(s[start:i])
+			}
+			e.WriteString(`\ufffd`)
+			i += size
+			start = i
+			continue
+		}
+		// U+2028 is LINE SEPARATOR.
+		// U+2029 is PARAGRAPH SEPARATOR.
+		// They are both technically valid characters in JSON strings,
+		// but don't work in JSONP, which has to be evaluated as JavaScript,
+		// and can lead to security holes there. It is valid JSON to
+		// escape them, so we do so unconditionally.
+		// See http://timelessrepo.com/json-isnt-a-javascript-subset for discussion.
+		if c == '\u2028' || c == '\u2029' {
+			if start < i {
+				e.Write(s[start:i])
+			}
+			e.WriteString(`\u202`)
+			e.WriteByte(hex[c&0xF])
+			i += size
+			start = i
+			continue
+		}
+		i += size
+	}
+	if start < len(s) {
+		e.Write(s[start:])
+	}
+	e.WriteByte('"')
+
+	return e.Bytes()
 }
 
 func (s *String) UnmarshalJSON(src []byte) (err error) {
