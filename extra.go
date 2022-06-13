@@ -94,3 +94,7 @@ func (s *Split) Consume() []String {
 type FromString interface {
 	FromString(*String) error
 }
+
+type ToString interface {
+	ToString() String
+}
