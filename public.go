@@ -279,3 +279,10 @@ func (s *String) TrimSpace() {
 func (s *String) ParseTo(to FromString) error {
 	return to.FromString(s)
 }
+
+func (s *String) Reverse() {
+	payload := s.payload()
+	for i := 0; i < s.len/2; i++ {
+		payload[i], payload[s.len-i] = payload[s.len-i], payload[i]
+	}
+}
