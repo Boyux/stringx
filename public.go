@@ -270,3 +270,7 @@ func (s *String) TrimSpace() {
 	copy(payload, payload[start:stop])
 	s.len = stop - start
 }
+
+func (s *String) ParseTo(to FromString) error {
+	return to.FromString(s)
+}

@@ -141,3 +141,7 @@ func (s *Split) Consume() []String {
 
 	return slice
 }
+
+type FromString interface {
+	FromString(*String) error
+}
