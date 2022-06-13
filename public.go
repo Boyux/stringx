@@ -158,6 +158,11 @@ func (s *String) StartsWith(pat string) bool {
 	return bytes.Equal(s.mem[0:len(b)], b)
 }
 
+func (s *String) EndsWith(pat string) bool {
+	b := stringToBytes(pat)
+	return bytes.Equal(s.mem[s.len-len(b):s.len], b)
+}
+
 func (s *String) Split(sep string) *Split {
 	return &Split{
 		mem:        s.payload(),
