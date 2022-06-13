@@ -165,10 +165,9 @@ func (s *String) EndsWith(pat string) bool {
 
 func (s *String) Split(sep string) *Split {
 	return &Split{
-		mem:        s.payload(),
-		idx:        0,
-		sep:        stringToBytes(sep),
-		cacheIndex: -1,
+		mem: s.payload(),
+		idx: 0,
+		sep: stringToBytes(sep),
 	}
 }
 

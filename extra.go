@@ -52,27 +52,25 @@ func (r *Runes) Consume() []rune {
 var _ Iterator[String] = (*Split)(nil)
 
 type Split struct {
-	mem        []byte
-	idx        int
-	sep        []byte
-	cacheIndex int
+	mem []byte
+	idx int
+	sep []byte
 }
 
 func (s *Split) Next() bool {
-	s.cacheIndex = bytes.Index(s.mem[s.idx:], s.sep)
-	return s.cacheIndex >= 0
+	return s.idx < len(s.mem)
 }
 
 func (s *Split) Value() String {
-	if s.cacheIndex < 0 {
-		if s.cacheIndex = bytes.Index(s.mem[s.idx:], s.sep); s.cacheIndex < 0 {
-			return FromBytes(s.mem[s.idx:])
-		}
+	loc := bytes.Index(s.mem[s.idx:], s.sep)
+
+	if loc < 0 {
+		s.idx = len(s.mem)
+		return FromBytes(s.mem[s.idx:])
 	}
 
-	next := FromBytes(s.mem[s.idx:s.cacheIndex])
-	s.idx += s.cacheIndex + len(s.sep)
-	s.cacheIndex = -1 // reset cache
+	next := FromBytes(s.mem[s.idx : s.idx+loc])
+	s.idx += loc + len(s.sep)
 
 	return next
 }
