@@ -1,6 +1,9 @@
 package st
 
-import "unicode/utf8"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 func New() String {
 	return WithCapacity(0)
@@ -57,4 +60,8 @@ func FromRune(in []rune) String {
 		len: n,
 		cap: len(mem),
 	}
+}
+
+func Format(format string, args ...any) String {
+	return From(fmt.Sprintf(format, args...))
 }
