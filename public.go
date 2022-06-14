@@ -107,7 +107,8 @@ func (s *String) Drain(l, r int) {
 }
 
 func (s *String) Get(i int) byte {
-	return s.mem[i]
+	payload := s.payload()
+	return payload[i]
 }
 
 func (s *String) Index(l, r int) String {
@@ -281,7 +282,28 @@ func (s *String) Reverse() {
 	}
 
 	payload := s.payload()
+
+	// slower case
+	for i := 0; i < s.len; i++ {
+		if c := payload[i]; c >= utf8.RuneSelf {
+			// NOTE: cloning (*s) is necessary, since changing the memory in (*s) would cause
+			// reverse problem, the Runes iterator shares the same memory owned by (*s)
+			cl := s.Clone()
+
+			if max := utf8.RuneCount(payload) * utf8.UTFMax; s.cap < max {
+				cl.grow(max - s.cap)
+			}
+
+			var n int
+			for rev := cl.Runes().Reverse(); rev.Next(); {
+				n += utf8.EncodeRune(s.mem[n:], rev.Value())
+			}
+
+			return
+		}
+	}
+
 	for i := 0; i < s.len/2; i++ {
-		payload[i], payload[s.len-i] = payload[s.len-i], payload[i]
+		payload[i], payload[s.len-1-i] = payload[s.len-1-i], payload[i]
 	}
 }

@@ -49,6 +49,30 @@ func TestString_Runes(t *testing.T) {
 	}
 }
 
+func TestRuneCount(t *testing.T) {
+	for _, data := range runeData {
+		s := From(data)
+		runes, rev := s.Runes(), s.Runes().Reverse()
+		if runes.Size() != rev.Size() {
+			t.Errorf("Runes: count is not equal: runes=%d rev=%d",
+				runes.Size(), rev.Size())
+		}
+	}
+}
+
+func TestRuneRev(t *testing.T) {
+	for _, data := range runeData {
+		s := From(data)
+		runes, rev := s.Runes().Consume(), s.Runes().Reverse().Consume()
+		for i := 0; i < len(runes); i++ {
+			if runes[i] != rev[len(rev)-1-i] {
+				t.Errorf("Runes: reverse failed: runes[%d]=%d rev[%d]=%d",
+					i, runes[i], len(rev)-1-i, rev[len(rev)-1-i])
+			}
+		}
+	}
+}
+
 func testStringReplace(t *testing.T, data []string) {
 	str, from, to, exp := From(data[0]), data[1], data[2], data[3]
 	before := str.Clone()
@@ -155,5 +179,33 @@ func BenchmarkStdTrimSpace(b *testing.B) {
 			str := data[0]
 			str = strings.TrimSpace(str)
 		}
+	}
+}
+
+func testStringReverse(t *testing.T, data []string) {
+	src, tgt := From(data[0]), data[1]
+	before := src.Clone()
+	src.Reverse()
+	if !src.EqualToString(tgt) {
+		t.Errorf("String: reverse failed: before=%s after=%s expect=%s",
+			before.String(), src.String(), tgt)
+	}
+}
+
+var reverseData = [][]string{
+	{"123456789", "987654321"},
+	{"abcdefghi", "ihgfedcba"},
+	{"你好", "好你"},
+	{"123你好", "好你321"},
+	{"1234你好", "好你4321"},
+	{"你好世界", "界世好你"},
+	{"你好世界👋", "👋界世好你"},
+	{"💯", "💯"},
+	{"👋💯", "💯👋"},
+}
+
+func TestString_Reverse(t *testing.T) {
+	for _, data := range reverseData {
+		testStringReverse(t, data)
 	}
 }

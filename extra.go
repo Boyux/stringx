@@ -49,6 +49,42 @@ func (r *Runes) Consume() []rune {
 	return slice
 }
 
+func (r *Runes) Reverse() *ReverseRunes {
+	return &ReverseRunes{
+		runes: r,
+		last:  len(r.mem),
+	}
+}
+
+type ReverseRunes struct {
+	runes *Runes
+	last  int
+}
+
+func (r *ReverseRunes) Next() bool {
+	return r.runes.idx < r.last
+}
+
+func (r *ReverseRunes) Value() rune {
+	next, n := utf8.DecodeLastRune(r.runes.mem[r.runes.idx:r.last])
+	r.last -= n
+	return next
+}
+
+func (r *ReverseRunes) Size() int {
+	return utf8.RuneCount(r.runes.mem[r.runes.idx:r.last])
+}
+
+func (r *ReverseRunes) Consume() []rune {
+	slice := make([]rune, 0, r.Size())
+
+	for r.Next() {
+		slice = append(slice, r.Value())
+	}
+
+	return slice
+}
+
 var _ Iterator[String] = (*Split)(nil)
 
 type Split struct {
