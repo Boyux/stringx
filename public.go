@@ -280,6 +280,10 @@ func (s *String) ParseTo(to FromString) error {
 }
 
 func (s *String) Reverse() {
+	if s.len < 2 {
+		return
+	}
+
 	payload := s.payload()
 	for i := 0; i < s.len/2; i++ {
 		payload[i], payload[s.len-i] = payload[s.len-i], payload[i]
