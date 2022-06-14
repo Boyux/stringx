@@ -1,9 +1,53 @@
 package st
 
 import (
+	"math/rand"
 	"strings"
 	"testing"
 )
+
+var elements = []rune{
+	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+	'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+	'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#', '$', '%', '^', '&',
+	'*', '(', ')', '{', '}', '[', ']', '\'', '\'', '"', '"', '你', '好', '世', '界', '💰', '🐱',
+}
+
+func random(n int) string {
+	slice := make([]rune, n)
+	for i := 0; i < n/2; i++ {
+		slice[i] = elements[rand.Intn(len(elements))]
+	}
+	for j := n / 2; j < n; j++ {
+		slice[j] = elements[len(elements)-6:][rand.Intn(len(elements[len(elements)-6:]))]
+	}
+	return string(elements)
+}
+
+func testStringRunes(t *testing.T, data string) {
+	s := From(data)
+	cvt, tgt := s.Runes(), []rune(s.String())
+	for i := 0; cvt.Next(); i++ {
+		if r := cvt.Value(); r != tgt[i] {
+			t.Errorf("Runes: Iterator.Value() = '%v', []rune(string)[%d] = '%v'",
+				r, i, tgt[i])
+		}
+	}
+}
+
+var runeData = []string{
+	"abc123abc",
+	"你好世界",
+	random(10),
+	random(100),
+	random(1000),
+}
+
+func TestString_Runes(t *testing.T) {
+	for _, data := range runeData {
+		testStringRunes(t, data)
+	}
+}
 
 func testStringReplace(t *testing.T, data []string) {
 	str, from, to, exp := From(data[0]), data[1], data[2], data[3]
