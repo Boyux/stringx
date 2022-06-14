@@ -33,16 +33,16 @@ func BenchmarkSafeToBytes(b *testing.B) {
 var s = From(str)
 
 func TestBytesToString(t *testing.T) {
-	s1, s2 := s.toString(), s.toStringSlow()
+	s1, s2 := s.toString(), s.toStringUnsafe()
 	if s1 != s2 {
 		t.Errorf("unsafe_convert: error converting bytes to string, safe_version=%s unsafe_version=%s\n",
 			s1, s2)
 	}
 }
 
-func BenchmarkUnsafeToString(b *testing.B) {
+func BenchmarkToStringUnsafe(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = s.toStringSlow()
+		_ = s.toStringUnsafe()
 	}
 }
 

@@ -28,10 +28,9 @@ func stringToBytes(s string) (b []byte) {
 	return b
 }
 
-// toStringSlow benchmark: 15.23 ns/op
-func (s *String) toStringSlow() (dst string) {
-	src := make([]byte, s.len)
-	copy(src, s.payload())
+// toStringUnsafe benchmark: 0.6994 ns/op
+func (s *String) toStringUnsafe() (dst string) {
+	src := s.payload()
 	st := (*reflect.StringHeader)(unsafe.Pointer(&dst))
 	sl := (*reflect.SliceHeader)(unsafe.Pointer(&src))
 	st.Data = sl.Data
