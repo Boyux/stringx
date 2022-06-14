@@ -21,10 +21,6 @@ func (s *String) RuneSlice() []rune {
 	return s.Runes().Consume()
 }
 
-func (s *String) String() string {
-	return s.toString()
-}
-
 func (s *String) Length() int {
 	return s.len
 }

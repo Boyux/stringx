@@ -10,6 +10,14 @@ import (
 	"unicode/utf8"
 )
 
+func (s *String) String() string {
+	return s.toString()
+}
+
+func (s *String) GoString() string {
+	return "\"" + s.toString() + "\""
+}
+
 func (s *String) Write(p []byte) (n int, err error) {
 	s.PushBytes(p)
 	return len(p), nil
