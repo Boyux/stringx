@@ -38,6 +38,12 @@ func (s *String) toStringUnsafe() (dst string) {
 	return dst
 }
 
+// UnsafeString is a faster way to convert String to primitive string by unsafe.Pointer,
+// it takes no extra cost but may cause memory issue if caller use UnsafeString incorrectly
+func (s *String) UnsafeString() string {
+	return s.toStringUnsafe()
+}
+
 // toString benchmark: 3.191 ns/op
 func (s *String) toString() string {
 	if s.len == 0 {

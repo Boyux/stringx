@@ -14,3 +14,9 @@ func (s *String) toString() string {
 
 	return string(s.payload())
 }
+
+// UnsafeString in 'convert.go' is safe, it is just for preventing compile issue
+// while disabling 'unsafe_convert' tag
+func (s *String) UnsafeString() string {
+	return s.toString()
+}
