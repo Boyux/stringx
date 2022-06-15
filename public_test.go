@@ -6,25 +6,6 @@ import (
 	"testing"
 )
 
-var elements = []rune{
-	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-	'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-	'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#', '$', '%', '^', '&',
-	'*', '(', ')', '{', '}', '[', ']', '\'', '\'', '"', '"', '\r', '\n', '\v', '\t', ' ', '\\',
-	'你', '好', '世', '界', '💰', '🐱',
-}
-
-func random(n int) string {
-	slice := make([]rune, n)
-	for i := 0; i < n/2; i++ {
-		slice[i] = elements[rand.Intn(len(elements))]
-	}
-	for j := n / 2; j < n; j++ {
-		slice[j] = elements[len(elements)-6:][rand.Intn(len(elements[len(elements)-6:]))]
-	}
-	return string(elements)
-}
-
 func testStringRunes(t *testing.T, data string) {
 	s := From(data)
 	cvt, tgt := s.Runes(), []rune(s.String())
@@ -121,7 +102,7 @@ func testStringReplace(t *testing.T, data []string) {
 	before := str.Clone()
 	str.Replace(from, to)
 	if !str.EqualToString(exp) {
-		t.Errorf("String: replacing pattern failed: before=%s after=%s old=%s new=%s expect=%s\n",
+		t.Errorf("String: replacing pattern failed: before=%s after=%s old=%s new=%s expect=%s",
 			before.String(), str.String(), from, to, exp)
 	}
 }
@@ -174,7 +155,7 @@ func testStringTrimSpace(t *testing.T, data []string) {
 	before := str.Clone()
 	str.TrimSpace()
 	if !str.EqualToString(exp) {
-		t.Errorf("String: triming space failed: before=%s after=%s expect=%s\n",
+		t.Errorf("String: triming space failed: before=%s after=%s expect=%s",
 			before.String(), str.String(), exp)
 	}
 }
@@ -184,7 +165,7 @@ func testStringTrimSpaceSlow(t *testing.T, data []string) {
 	before := str.Clone()
 	str.TrimSpaceSlow()
 	if !str.EqualToString(exp) {
-		t.Errorf("String: triming space failed: before=%s after=%s expect=%s\n",
+		t.Errorf("String: triming space failed: before=%s after=%s expect=%s",
 			before.String(), str.String(), exp)
 	}
 }
