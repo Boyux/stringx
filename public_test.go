@@ -73,6 +73,48 @@ func TestRuneRev(t *testing.T) {
 	}
 }
 
+func testStringDrain(t *testing.T, data struct {
+	s      string
+	r1, r2 int
+}) {
+	var l, r int
+	if data.r1 < data.r2 {
+		l, r = data.r1, data.r2
+	} else {
+		l, r = data.r2, data.r1
+	}
+
+	s = From(data.s)
+	before := s.Clone()
+	s.Drain(l, r)
+	expect := data.s[:l] + data.s[r:]
+	if !s.EqualToString(expect) {
+		t.Errorf("String: drain failed: before=%s after=%s expect=%s",
+			before.String(), s.String(), expect)
+	}
+}
+
+var drainData = []struct {
+	s  string
+	r1 int
+	r2 int
+}{
+	{random(0), 0, 0},
+	{random(10), 0, 0},
+	{random(10), rand.Intn(10), rand.Intn(10)},
+	{random(10), rand.Intn(10), rand.Intn(10)},
+	{random(10), rand.Intn(10), rand.Intn(10)},
+	{random(100), rand.Intn(100), rand.Intn(100)},
+	{random(100), rand.Intn(100), rand.Intn(100)},
+	{random(100), rand.Intn(100), rand.Intn(100)},
+}
+
+func TestString_Drain(t *testing.T) {
+	for _, data := range drainData {
+		testStringDrain(t, data)
+	}
+}
+
 func testStringReplace(t *testing.T, data []string) {
 	str, from, to, exp := From(data[0]), data[1], data[2], data[3]
 	before := str.Clone()
