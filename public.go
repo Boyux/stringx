@@ -2,6 +2,7 @@ package st
 
 import (
 	"bytes"
+	"strconv"
 	"unicode"
 	"unicode/utf8"
 )
@@ -270,6 +271,10 @@ func (s *String) TrimSpace() {
 	payload := s.payload()
 	copy(payload, payload[start:stop])
 	s.len = stop - start
+}
+
+func (s *String) ParseInt() (int64, error) {
+	return strconv.ParseInt(s.UnsafeString(), 10, 64)
 }
 
 func (s *String) ParseTo(to FromString) error {

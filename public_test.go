@@ -2,6 +2,7 @@ package st
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -202,6 +203,44 @@ func BenchmarkStdTrimSpace(b *testing.B) {
 		for _, data := range trimSpaceData {
 			str := data[0]
 			str = strings.TrimSpace(str)
+		}
+	}
+}
+
+func TestString_ParseInt(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		n := strconv.Itoa(i)
+		s := From(n)
+		cvt, _ := s.ParseInt()
+		if cvt != int64(i) {
+			t.Errorf("String: parse integer failed: parsed=%d expect=%d",
+				cvt, i)
+		}
+	}
+}
+
+type integer int64
+
+func (i *integer) FromString(s *String) error {
+	n, err := s.ParseInt()
+	if err != nil {
+		return err
+	}
+	*i = integer(n)
+	return nil
+}
+
+func TestString_ParseTo(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		var n integer
+		s := From(strconv.Itoa(i))
+		if err := s.ParseTo(&n); err != nil {
+			t.Errorf("String.ParseTo: %s", err.Error())
+			return
+		}
+		if n != integer(i) {
+			t.Errorf("String: parse to type failed: parsed=%d expect=%d",
+				n, i)
 		}
 	}
 }
