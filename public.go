@@ -312,3 +312,75 @@ func (s *String) Reverse() {
 		payload[i], payload[s.len-1-i] = payload[s.len-1-i], payload[i]
 	}
 }
+
+func (s *String) ToUpper() {
+	isASCII, hasLower := true, false
+	for i := 0; i < s.len; i++ {
+		c := s.Get(i)
+		if c >= utf8.RuneSelf {
+			isASCII = false
+			break
+		}
+		hasLower = hasLower || ('a' <= c && c <= 'z')
+	}
+
+	p := s.payload()
+	if isASCII {
+		if !hasLower {
+			return
+		}
+		for i := 0; i < s.len; i++ {
+			if 'a' <= p[i] && p[i] <= 'z' {
+				p[i] -= 'a' - 'A'
+			}
+		}
+		return
+	}
+
+	if max := utf8.RuneCount(p) * utf8.UTFMax; s.cap < max {
+		s.grow(max - s.cap)
+	}
+
+	var n int
+	for runes := s.Runes(); runes.Next(); {
+		n += utf8.EncodeRune(s.mem[n:], unicode.ToUpper(runes.Value()))
+	}
+
+	return
+}
+
+func (s *String) ToLower() {
+	isASCII, hasUpper := true, false
+	for i := 0; i < s.len; i++ {
+		c := s.Get(i)
+		if c >= utf8.RuneSelf {
+			isASCII = false
+			break
+		}
+		hasUpper = hasUpper || ('A' <= c && c <= 'Z')
+	}
+
+	p := s.payload()
+	if isASCII {
+		if !hasUpper {
+			return
+		}
+		for i := 0; i < s.len; i++ {
+			if 'A' <= p[i] && p[i] <= 'Z' {
+				p[i] += 'a' - 'A'
+			}
+		}
+		return
+	}
+
+	if max := utf8.RuneCount(p) * utf8.UTFMax; s.cap < max {
+		s.grow(max - s.cap)
+	}
+
+	var n int
+	for runes := s.Runes(); runes.Next(); {
+		n += utf8.EncodeRune(s.mem[n:], unicode.ToLower(runes.Value()))
+	}
+
+	return
+}

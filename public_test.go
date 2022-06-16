@@ -272,3 +272,31 @@ func TestString_Reverse(t *testing.T) {
 		testStringReverse(t, data)
 	}
 }
+
+func TestString_ToUpper(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		str := random(10)
+		s := From(str)
+		before := s.Clone()
+		s.ToUpper()
+		expect := strings.ToUpper(str)
+		if !s.EqualToString(expect) {
+			t.Errorf("String: to upper failed: before=%s after=%s expect=%s",
+				before.String(), s.String(), expect)
+		}
+	}
+}
+
+func TestString_ToLower(t *testing.T) {
+	for i := 0; i < s.len; i++ {
+		str := random(10)
+		s := From(str)
+		before := s.Clone()
+		s.ToLower()
+		expect := strings.ToLower(str)
+		if !s.EqualToString(expect) {
+			t.Errorf("String: to lower failed: before=%s after=%s expect=%s",
+				before.String(), s.String(), expect)
+		}
+	}
+}
