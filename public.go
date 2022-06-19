@@ -80,6 +80,20 @@ func (s *String) Push(b byte) {
 	s.len += 1
 }
 
+func (s *String) PushRune(r rune) {
+	if r < utf8.RuneSelf {
+		s.Push(byte(r))
+		return
+	}
+
+	if s.len+utf8.UTFMax > s.cap {
+		s.grow(utf8.UTFMax)
+	}
+
+	n := utf8.EncodeRune(s.mem[s.len:s.cap], r)
+	s.len += n
+}
+
 func (s *String) PushString(str string) {
 	l := len(str)
 
@@ -100,6 +114,12 @@ func (s *String) PushBytes(bytes []byte) {
 
 	copy(s.mem[s.len:s.cap], bytes)
 	s.len += l
+}
+
+func (s *String) PushRunes(runes []rune) {
+	for _, r := range runes {
+		s.PushRune(r)
+	}
 }
 
 func (s *String) Drain(l, r int) {
