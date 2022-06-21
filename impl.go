@@ -10,6 +10,11 @@ import (
 	"unicode/utf8"
 )
 
+func (s *String) Init(ini Initializer[*String]) *String {
+	ini.Init(s)
+	return s
+}
+
 func (s *String) String() string {
 	return s.toString()
 }

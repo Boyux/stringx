@@ -132,3 +132,54 @@ type FromString interface {
 type ToString interface {
 	ToString() String
 }
+
+type Initializer[T any] interface {
+	Init(T)
+}
+
+var _ Initializer[*String] = *(*StringInitializer)(nil)
+var _ Initializer[*String] = *(*BytesInitializer)(nil)
+var _ Initializer[*String] = *(*RunesInitializer)(nil)
+
+type StringInitializer string
+
+func (str StringInitializer) Init(s *String) {
+	if s.cap < len(str) {
+		s.grow(len(str))
+	}
+
+	copy(s.mem[0:], str)
+	s.len = len(str)
+}
+
+type BytesInitializer []byte
+
+func (b BytesInitializer) Init(s *String) {
+	if s.cap < len(b) {
+		s.grow(len(b))
+	}
+
+	copy(s.mem[0:], b)
+	s.len = len(b)
+}
+
+type RunesInitializer []rune
+
+func (r RunesInitializer) Init(s *String) {
+	l := len(r) * utf8.UTFMax
+	if s.cap < l {
+		s.grow(l)
+	}
+
+	var n int
+	for _, rr := range r {
+		n += utf8.EncodeRune(s.mem[n:], rr)
+	}
+	s.len = n
+}
+
+type Init[Self Init[Self, T], T Initializer[Self]] interface {
+	Init(T) Self
+}
+
+var _ Init[*String, Initializer[*String]] = (*String)(nil)
