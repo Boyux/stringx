@@ -137,9 +137,9 @@ type Initializer[T any] interface {
 	Init(T)
 }
 
-var _ Initializer[*String] = *(*StringInitializer)(nil)
-var _ Initializer[*String] = *(*BytesInitializer)(nil)
-var _ Initializer[*String] = *(*RunesInitializer)(nil)
+var _ Initializer[*String] = StringInitializer("StringInitializer")
+var _ Initializer[*String] = BytesInitializer("BytesInitializer")
+var _ Initializer[*String] = RunesInitializer("RunesInitializer")
 
 type StringInitializer string
 
@@ -178,7 +178,7 @@ func (r RunesInitializer) Init(s *String) {
 	s.len = n
 }
 
-type Init[Self Init[Self, T], T Initializer[Self]] interface {
+type Init[Self any, T Initializer[Self]] interface {
 	Init(T) Self
 }
 

@@ -6,6 +6,18 @@ import (
 	"testing"
 )
 
+func TestString_Init(t *testing.T) {
+	var s String
+	for i := 0; i < 100; i++ {
+		str := random(i + 10)
+		s.Reset()
+		if !s.Init(StringInitializer(str)).EqualToString(str) {
+			t.Errorf("String: impl Init[string]: String=%s string=%s",
+				s.String(), str)
+		}
+	}
+}
+
 func TestString_MarshalJSON(t *testing.T) {
 	var (
 		str string
