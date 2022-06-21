@@ -2,6 +2,7 @@ package strmut
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"unicode/utf8"
 )
@@ -136,8 +137,26 @@ type ToString interface {
 
 type Int int
 
+func (i Int) String() string {
+	return strconv.Itoa(int(i))
+}
+
 func (i Int) ToString() String {
-	return From(strconv.Itoa(int(i)))
+	return From(i.String())
+}
+
+type Str string
+
+func (str Str) String() string {
+	return string(str)
+}
+
+func (str Str) ToString() String {
+	return From(str.String())
+}
+
+func (str Str) Len() int {
+	return len(str)
 }
 
 type Initializer[T any] interface {
@@ -190,3 +209,37 @@ type Init[Self any, T Initializer[Self]] interface {
 }
 
 var _ Init[*String, Initializer[*String]] = (*String)(nil)
+
+type List[S fmt.Stringer] []S
+
+var _ = List[*String]{(*String)(nil)}
+var _ interface{ Len() int } = (*String)(nil)
+var _ interface{ Len() int } = Str("Str.Len")
+
+func (l List[S]) Join(sep string) (s String) {
+	if len(l) == 0 {
+		return New()
+	}
+
+	if len(l) == 1 {
+		return From(l[0].String())
+	}
+
+	var head any = l[0]
+	if _, ok := head.(interface{ Len() int }); ok {
+		n := len(sep) * (len(l) - 1)
+		for i := 0; i < len(l); i++ {
+			var ele any = l[i]
+			n += ele.(interface{ Len() int }).Len()
+		}
+		s.grow(n)
+	}
+
+	s.PushString(l[0].String())
+	for i := 1; i < len(l); i++ {
+		s.PushString(sep)
+		s.PushString(l[i].String())
+	}
+
+	return s
+}

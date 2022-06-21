@@ -26,6 +26,11 @@ func (s *String) Length() int {
 	return s.len
 }
 
+// Len is to implement interface { Len() int }
+func (s *String) Len() int {
+	return s.Length()
+}
+
 func (s *String) Capacity() int {
 	return s.cap
 }
