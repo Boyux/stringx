@@ -1,7 +1,10 @@
 //go:build !unsafe_convert
-// +build !unsafe_convert
 
-package st
+package strmut
+
+func stringToBytesSlow(s string) (b []byte) {
+	return []byte(s)
+}
 
 func stringToBytes(s string) []byte {
 	return []byte(s)

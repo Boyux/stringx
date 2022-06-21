@@ -1,3 +1,3 @@
-module st
+module strmut
 
 go 1.18
