@@ -2,6 +2,7 @@ package strmut
 
 import (
 	"bytes"
+	"strconv"
 	"unicode/utf8"
 )
 
@@ -131,6 +132,12 @@ type FromString interface {
 
 type ToString interface {
 	ToString() String
+}
+
+type Int int
+
+func (i Int) ToString() String {
+	return From(strconv.Itoa(int(i)))
 }
 
 type Initializer[T any] interface {
