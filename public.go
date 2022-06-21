@@ -173,12 +173,12 @@ func (s *String) Contains(sub string) bool {
 
 func (s *String) StartsWith(pat string) bool {
 	b := stringToBytes(pat)
-	return bytes.Equal(s.mem[0:len(b)], b)
+	return s.len >= len(pat) && bytes.Equal(s.mem[0:len(b)], b)
 }
 
 func (s *String) EndsWith(pat string) bool {
 	b := stringToBytes(pat)
-	return bytes.Equal(s.mem[s.len-len(b):s.len], b)
+	return s.len >= len(pat) && bytes.Equal(s.mem[s.len-len(b):s.len], b)
 }
 
 func (s *String) Split(sep string) *Split {
