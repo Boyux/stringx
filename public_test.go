@@ -67,7 +67,7 @@ func testStringDrain(t *testing.T, data struct {
 		l, r = data.r2, data.r1
 	}
 
-	s = From(data.s)
+	s := From(data.s)
 	before := s.Clone()
 	s.Drain(l, r)
 	expect := data.s[:l] + data.s[r:]
@@ -288,7 +288,7 @@ func TestString_ToUpper(t *testing.T) {
 }
 
 func TestString_ToLower(t *testing.T) {
-	for i := 0; i < s.len; i++ {
+	for i := 0; i < 100; i++ {
 		str := random(10)
 		s := From(str)
 		before := s.Clone()
