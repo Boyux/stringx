@@ -11,7 +11,8 @@ func TestString_Init(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		str := random(i + 10)
 		s.Reset()
-		if !s.Init(StringInitializer(str)).EqualToString(str) {
+		s.Init(StringInitializer(str))
+		if !s.EqualToString(str) {
 			t.Errorf("String: impl Init[string]: String=%s string=%s",
 				s.String(), str)
 		}

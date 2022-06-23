@@ -23,9 +23,15 @@ func (s *String) GoString() string {
 	return "\"" + s.toString() + "\""
 }
 
-func (s *String) Error() string {
-	return s.toString()
-}
+// Error transform *String as an error, however, this method make IDE like Goland
+// unhappy because all errors should be handled, so code like
+// 		var s String
+// 		s.Init(StringInitialier("init"))
+// would cause warning messages, so remove it temporary.
+// uncomment codes below to enable Error method
+// func (s *String) Error() string {
+// 	return s.toString()
+// }
 
 func (s *String) Write(p []byte) (n int, err error) {
 	s.PushBytes(p)
