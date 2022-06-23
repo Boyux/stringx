@@ -23,6 +23,10 @@ func (s *String) GoString() string {
 	return "\"" + s.toString() + "\""
 }
 
+func (s *String) ToString() String {
+	return s.Clone()
+}
+
 // Error transform *String as an error, however, this method make IDE like Goland
 // unhappy because all errors should be handled, so code like
 // 		var s String
