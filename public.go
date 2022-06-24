@@ -482,3 +482,10 @@ func (s *String) ToLower() {
 
 	return
 }
+
+func (s *String) Lines() *Lines {
+	return &Lines{
+		mem: s.payload(),
+		idx: 0,
+	}
+}

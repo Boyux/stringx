@@ -12,6 +12,41 @@ type Iterator[T any] interface {
 	Value() T
 }
 
+var _ Iterator[*String] = (*Lines)(nil)
+
+type Lines struct {
+	mem []byte
+	idx int
+}
+
+func (l *Lines) Next() bool {
+	return l.idx < len(l.mem)
+}
+
+func (l *Lines) Value() *String {
+	dropCR := func(data []byte) []byte {
+		if len(data) > 0 && data[len(data)-1] == '\r' {
+			return data[0 : len(data)-1]
+		}
+		return data
+	}
+
+	var next String
+
+	loc := bytes.IndexByte(l.mem[l.idx:], '\n')
+
+	if loc < 0 {
+		next.FromBytes(dropCR(l.mem[l.idx:]))
+		l.idx = len(l.mem)
+		return &next
+	}
+
+	next.FromBytes(dropCR(l.mem[l.idx : l.idx+loc]))
+	l.idx += loc + 1
+
+	return &next
+}
+
 var _ Iterator[rune] = (*Runes)(nil)
 
 type Runes struct {
@@ -105,8 +140,8 @@ func (s *Split) Value() *String {
 	loc := bytes.Index(s.mem[s.idx:], s.sep)
 
 	if loc < 0 {
-		s.idx = len(s.mem)
 		next.FromBytes(s.mem[s.idx:])
+		s.idx = len(s.mem)
 		return &next
 	}
 
