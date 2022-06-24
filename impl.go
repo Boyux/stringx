@@ -10,9 +10,15 @@ import (
 	"unicode/utf8"
 )
 
-func (s *String) Init(ini Initializer[*String]) *String {
-	ini.Init(s)
+func (s *String) From(ini Initializer[*String]) *String {
+	s.build(nil, 0, 0)
+	ini.Initialize(s)
+	s.copycheck()
 	return s
+}
+
+func (s *String) Initialize(target *String) {
+	s.CloneInto(target)
 }
 
 func (s *String) String() string {
@@ -23,14 +29,14 @@ func (s *String) GoString() string {
 	return "\"" + s.toString() + "\""
 }
 
-func (s *String) ToString() String {
+func (s *String) ToString() *String {
 	return s.Clone()
 }
 
 // Error transform *String as an error, however, this method make IDE like Goland
 // unhappy because all errors should be handled, so code like
 // 		var s String
-// 		s.Init(StringInitialier("init"))
+// 		s.From(StringInitialier("init"))
 // would cause warning messages, so remove it temporary.
 // uncomment codes below to enable Error method
 // func (s *String) Error() string {

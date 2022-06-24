@@ -7,6 +7,72 @@ import (
 	"unicode/utf8"
 )
 
+func (s *String) Init() {
+	s.assumeUninit()
+	s.build(nil, 0, 0)
+}
+
+func (s *String) SetCapacity(capacity int) {
+	if s.alreadyInit() {
+		if s.cap < capacity {
+			s.grow(capacity - s.cap)
+		}
+	} else {
+		s.build(make([]byte, capacity), 0, capacity)
+	}
+}
+
+func (s *String) FromString(in string) {
+	if s.alreadyInit() {
+		s.Reset()
+		s.PushString(in)
+	} else {
+		// convert input to bytes, there is a faster way by using
+		// unsafe.Pointer, which is not recommended
+		//
+		// ## SAFETY
+		// because String is a mutable type, so String.mem should
+		// also be mutable. However, byte slice converted by unsafe
+		// function stringToBytes is immutable, mutating those bytes
+		// would cause 'unexpected fault address' error
+		mem := stringToBytesSlow(in)
+
+		s.build(
+			mem,
+			len(mem),
+			// we use slice length as capacity but not the slice cap
+			len(mem),
+		)
+	}
+}
+
+func (s *String) FromBytes(in []byte) {
+	if s.alreadyInit() {
+		s.Reset()
+		s.PushBytes(in)
+	} else {
+		mem := make([]byte, len(in))
+		copy(mem, in)
+		s.build(mem, len(mem), len(mem))
+	}
+}
+
+func (s *String) FromRunes(in []rune) {
+	if s.alreadyInit() {
+		s.Reset()
+		s.PushRunes(in)
+	} else {
+		mem := make([]byte, len(in)*utf8.UTFMax)
+
+		var n int
+		for _, r := range in {
+			n += utf8.EncodeRune(mem[n:], r)
+		}
+
+		s.build(mem, n, len(mem))
+	}
+}
+
 func (s *String) Bytes() []byte {
 	return s.payload()
 }
@@ -43,15 +109,16 @@ func (s *String) IsEmpty() bool {
 	return s.len == 0
 }
 
-func (s *String) Clone() String {
+func (s *String) Clone() *String {
+	var cloned String
 	mem := make([]byte, s.len)
 	copy(mem, s.payload())
+	cloned.build(mem, s.len, s.len)
+	return &cloned
+}
 
-	return String{
-		mem: mem,
-		len: s.len,
-		cap: s.len,
-	}
+func (s *String) CloneInto(target *String) {
+	target.FromString(s.UnsafeString())
 }
 
 func (s *String) Insert(i int, b byte) {
@@ -148,7 +215,7 @@ func (s *String) Index(l, r int) String {
 	}
 }
 
-func (s *String) EqualTo(other String) bool {
+func (s *String) EqualTo(other *String) bool {
 	if s.len != other.len {
 		return false
 	}
@@ -164,7 +231,7 @@ func (s *String) EqualToString(str string) bool {
 	return bytes.Equal(s.payload(), stringToBytes(str))
 }
 
-func (s *String) CompareTo(other String) int {
+func (s *String) CompareTo(other *String) int {
 	return bytes.Compare(s.payload(), other.payload())
 }
 
@@ -194,7 +261,7 @@ func (s *String) Split(sep string) *Split {
 	}
 }
 
-func (s *String) SplitSlice(sep string) []String {
+func (s *String) SplitSlice(sep string) []*String {
 	return s.Split(sep).Consume()
 }
 
@@ -307,6 +374,8 @@ func (s *String) ParseTo(to FromString) error {
 }
 
 func (s *String) Reverse() {
+	s.copycheck()
+
 	if s.len < 2 {
 		return
 	}
@@ -339,6 +408,8 @@ func (s *String) Reverse() {
 }
 
 func (s *String) ToUpper() {
+	s.copycheck()
+
 	isASCII, hasLower := true, false
 	for i := 0; i < s.len; i++ {
 		c := s.Get(i)
@@ -375,6 +446,8 @@ func (s *String) ToUpper() {
 }
 
 func (s *String) ToLower() {
+	s.copycheck()
+
 	isASCII, hasUpper := true, false
 	for i := 0; i < s.len; i++ {
 		c := s.Get(i)

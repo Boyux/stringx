@@ -87,7 +87,7 @@ func (r *ReverseRunes) Consume() []rune {
 	return slice
 }
 
-var _ Iterator[String] = (*Split)(nil)
+var _ Iterator[*String] = (*Split)(nil)
 
 type Split struct {
 	mem []byte
@@ -99,26 +99,29 @@ func (s *Split) Next() bool {
 	return s.idx < len(s.mem)
 }
 
-func (s *Split) Value() String {
+func (s *Split) Value() *String {
+	var next String
+
 	loc := bytes.Index(s.mem[s.idx:], s.sep)
 
 	if loc < 0 {
 		s.idx = len(s.mem)
-		return FromBytes(s.mem[s.idx:])
+		next.FromBytes(s.mem[s.idx:])
+		return &next
 	}
 
-	next := FromBytes(s.mem[s.idx : s.idx+loc])
+	next.FromBytes(s.mem[s.idx : s.idx+loc])
 	s.idx += loc + len(s.sep)
 
-	return next
+	return &next
 }
 
 func (s *Split) Size() int {
 	return bytes.Count(s.mem[s.idx:], s.sep)
 }
 
-func (s *Split) Consume() []String {
-	slice := make([]String, 0, s.Size())
+func (s *Split) Consume() []*String {
+	slice := make([]*String, 0, s.Size())
 
 	for s.Next() {
 		slice = append(slice, s.Value())
@@ -132,7 +135,7 @@ type FromString interface {
 }
 
 type ToString interface {
-	ToString() String
+	ToString() *String
 }
 
 type Int int
@@ -141,8 +144,10 @@ func (i Int) String() string {
 	return strconv.Itoa(int(i))
 }
 
-func (i Int) ToString() String {
-	return From(i.String())
+func (i Int) ToString() *String {
+	var s String
+	s.FromString(i.String())
+	return &s
 }
 
 type Str string
@@ -151,8 +156,10 @@ func (str Str) String() string {
 	return string(str)
 }
 
-func (str Str) ToString() String {
-	return From(str.String())
+func (str Str) ToString() *String {
+	var s String
+	s.FromString(str.String())
+	return &s
 }
 
 func (str Str) Len() int {
@@ -160,16 +167,17 @@ func (str Str) Len() int {
 }
 
 type Initializer[T any] interface {
-	Init(T)
+	Initialize(T)
 }
 
 var _ Initializer[*String] = StringInitializer("StringInitializer")
 var _ Initializer[*String] = BytesInitializer("BytesInitializer")
 var _ Initializer[*String] = RunesInitializer("RunesInitializer")
+var _ Initializer[*String] = (*String)(nil)
 
 type StringInitializer string
 
-func (str StringInitializer) Init(s *String) {
+func (str StringInitializer) Initialize(s *String) {
 	if s.cap < len(str) {
 		s.grow(len(str))
 	}
@@ -180,7 +188,7 @@ func (str StringInitializer) Init(s *String) {
 
 type BytesInitializer []byte
 
-func (b BytesInitializer) Init(s *String) {
+func (b BytesInitializer) Initialize(s *String) {
 	if s.cap < len(b) {
 		s.grow(len(b))
 	}
@@ -191,7 +199,7 @@ func (b BytesInitializer) Init(s *String) {
 
 type RunesInitializer []rune
 
-func (r RunesInitializer) Init(s *String) {
+func (r RunesInitializer) Initialize(s *String) {
 	l := len(r) * utf8.UTFMax
 	if s.cap < l {
 		s.grow(l)
@@ -204,11 +212,11 @@ func (r RunesInitializer) Init(s *String) {
 	s.len = n
 }
 
-type Init[Self any, T Initializer[Self]] interface {
-	Init(T) Self
+type From[Self any, T Initializer[Self]] interface {
+	From(T) Self
 }
 
-var _ Init[*String, Initializer[*String]] = (*String)(nil)
+var _ From[*String, Initializer[*String]] = (*String)(nil)
 
 type List[S fmt.Stringer] []S
 
@@ -216,13 +224,17 @@ var _ = List[*String]{(*String)(nil)}
 var _ interface{ Len() int } = (*String)(nil)
 var _ interface{ Len() int } = Str("Str.Len")
 
-func (l List[S]) Join(sep string) (s String) {
+func (l List[S]) Join(sep string) *String {
+	var s String
+
 	if len(l) == 0 {
-		return New()
+		s.Init()
+		return &s
 	}
 
 	if len(l) == 1 {
-		return From(l[0].String())
+		s.FromString(l[0].String())
+		return &s
 	}
 
 	var head any = l[0]
@@ -241,5 +253,5 @@ func (l List[S]) Join(sep string) (s String) {
 		s.PushString(l[i].String())
 	}
 
-	return s
+	return &s
 }

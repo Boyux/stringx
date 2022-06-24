@@ -8,7 +8,8 @@ import (
 )
 
 func testStringRunes(t *testing.T, data string) {
-	s := From(data)
+	var s String
+	s.FromString(data)
 	cvt, tgt := s.Runes(), []rune(s.String())
 	for i := 0; cvt.Next(); i++ {
 		if r := cvt.Value(); r != tgt[i] {
@@ -33,8 +34,9 @@ func TestString_Runes(t *testing.T) {
 }
 
 func TestRuneCount(t *testing.T) {
+	var s String
 	for _, data := range runeData {
-		s := From(data)
+		s.FromString(data)
 		runes, rev := s.Runes(), s.Runes().Reverse()
 		if runes.Size() != rev.Size() {
 			t.Errorf("Runes: count is not equal: runes=%d rev=%d",
@@ -44,8 +46,9 @@ func TestRuneCount(t *testing.T) {
 }
 
 func TestRuneRev(t *testing.T) {
+	var s String
 	for _, data := range runeData {
-		s := From(data)
+		s.FromString(data)
 		runes, rev := s.Runes().Consume(), s.Runes().Reverse().Consume()
 		for i := 0; i < len(runes); i++ {
 			if runes[i] != rev[len(rev)-1-i] {
@@ -67,8 +70,10 @@ func testStringDrain(t *testing.T, data struct {
 		l, r = data.r2, data.r1
 	}
 
-	s := From(data.s)
-	before := s.Clone()
+	var s String
+	s.FromString(data.s)
+	var before String
+	s.CloneInto(&before)
 	s.Drain(l, r)
 	expect := data.s[:l] + data.s[r:]
 	if !s.EqualToString(expect) {
@@ -99,8 +104,11 @@ func TestString_Drain(t *testing.T) {
 }
 
 func testStringReplace(t *testing.T, data []string) {
-	str, from, to, exp := From(data[0]), data[1], data[2], data[3]
-	before := str.Clone()
+	var str String
+	str.FromString(data[0])
+	from, to, exp := data[1], data[2], data[3]
+	var before String
+	str.CloneInto(&before)
 	str.Replace(from, to)
 	if !str.EqualToString(exp) {
 		t.Errorf("String: replacing pattern failed: before=%s after=%s old=%s new=%s expect=%s",
@@ -125,18 +133,22 @@ func TestString_Replace(t *testing.T) {
 }
 
 func BenchmarkString_Replace(b *testing.B) {
+	var str String
 	for i := 0; i < b.N; i++ {
 		for _, data := range replaceData {
-			str, from, to := From(data[0]), data[1], data[2]
+			str.FromString(data[0])
+			from, to := data[1], data[2]
 			str.Replace(from, to)
 		}
 	}
 }
 
 func BenchmarkString_ReplaceToNew(b *testing.B) {
+	var str String
 	for i := 0; i < b.N; i++ {
 		for _, data := range replaceData {
-			str, from, to := From(data[0]), data[1], data[2]
+			str.FromString(data[0])
+			from, to := data[1], data[2]
 			str = str.ReplaceToNew(from, to)
 		}
 	}
@@ -152,8 +164,11 @@ func BenchmarkStdReplace(b *testing.B) {
 }
 
 func testStringTrimSpace(t *testing.T, data []string) {
-	str, exp := From(data[0]), data[1]
-	before := str.Clone()
+	var str String
+	str.FromString(data[0])
+	exp := data[1]
+	var before String
+	str.CloneInto(&before)
 	str.TrimSpace()
 	if !str.EqualToString(exp) {
 		t.Errorf("String: triming space failed: before=%s after=%s expect=%s",
@@ -162,8 +177,11 @@ func testStringTrimSpace(t *testing.T, data []string) {
 }
 
 func testStringTrimSpaceSlow(t *testing.T, data []string) {
-	str, exp := From(data[0]), data[1]
-	before := str.Clone()
+	var str String
+	str.FromString(data[0])
+	exp := data[1]
+	var before String
+	str.CloneInto(&before)
 	str.TrimSpaceSlow()
 	if !str.EqualToString(exp) {
 		t.Errorf("String: triming space failed: before=%s after=%s expect=%s",
@@ -190,9 +208,10 @@ func TestString_TrimSpaceSlow(t *testing.T) {
 }
 
 func BenchmarkString_TrimSpace(b *testing.B) {
+	var str String
 	for i := 0; i < b.N; i++ {
 		for _, data := range trimSpaceData {
-			str := From(data[0])
+			str.FromString(data[0])
 			str.TrimSpace()
 		}
 	}
@@ -208,9 +227,10 @@ func BenchmarkStdTrimSpace(b *testing.B) {
 }
 
 func TestString_ParseInt(t *testing.T) {
+	var s String
 	for i := 0; i < 100; i++ {
 		n := strconv.Itoa(i)
-		s := From(n)
+		s.FromString(n)
 		cvt, _ := s.ParseInt()
 		if cvt != int64(i) {
 			t.Errorf("String: parse integer failed: parsed=%d expect=%d",
@@ -231,9 +251,10 @@ func (i *integer) FromString(s *String) error {
 }
 
 func TestString_ParseTo(t *testing.T) {
+	var s String
 	for i := 0; i < 100; i++ {
 		var n integer
-		s := From(strconv.Itoa(i))
+		s.FromString(strconv.Itoa(i))
 		if err := s.ParseTo(&n); err != nil {
 			t.Errorf("String.ParseTo: %s", err.Error())
 			return
@@ -246,8 +267,11 @@ func TestString_ParseTo(t *testing.T) {
 }
 
 func testStringReverse(t *testing.T, data []string) {
-	src, tgt := From(data[0]), data[1]
-	before := src.Clone()
+	var src String
+	src.FromString(data[0])
+	tgt := data[1]
+	var before String
+	src.CloneInto(&before)
 	src.Reverse()
 	if !src.EqualToString(tgt) {
 		t.Errorf("String: reverse failed: before=%s after=%s expect=%s",
@@ -274,10 +298,12 @@ func TestString_Reverse(t *testing.T) {
 }
 
 func TestString_ToUpper(t *testing.T) {
+	var s String
 	for i := 0; i < 100; i++ {
 		str := random(10)
-		s := From(str)
-		before := s.Clone()
+		s.FromString(str)
+		var before String
+		s.CloneInto(&before)
 		s.ToUpper()
 		expect := strings.ToUpper(str)
 		if !s.EqualToString(expect) {
@@ -288,9 +314,10 @@ func TestString_ToUpper(t *testing.T) {
 }
 
 func TestString_ToLower(t *testing.T) {
+	var s String
 	for i := 0; i < 100; i++ {
 		str := random(10)
-		s := From(str)
+		s.FromString(str)
 		before := s.Clone()
 		s.ToLower()
 		expect := strings.ToLower(str)
