@@ -1,6 +1,7 @@
 package strmut
 
 import (
+	"bufio"
 	"strings"
 	"testing"
 )
@@ -19,6 +20,27 @@ func TestList_Join(t *testing.T) {
 		if !s.EqualToString(exp) {
 			t.Errorf("extra: List[*String]: joint=%s expect=%s",
 				s.String(), exp)
+		}
+	}
+}
+
+func TestString_Lines(t *testing.T) {
+	var s String
+	for i := 0; i < 10; i++ {
+		str := random(400) + "\r\n" + random(400) + "\r\n"
+		s.FromString(str)
+		lines, scanner := s.Lines(), bufio.NewScanner(strings.NewReader(str))
+		for scanner.Scan() {
+			if !lines.Next() {
+				t.Errorf("extra: Iterator[*String]: Lines: scanner has next token but lines has no value")
+			}
+
+			line := lines.Value().UnsafeString()
+			expect := scanner.Text()
+			if line != expect {
+				t.Errorf("extra: Iterator[*String]: Lines: line = %s expect = %s",
+					line, expect)
+			}
 		}
 	}
 }
