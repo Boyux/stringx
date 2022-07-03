@@ -122,6 +122,8 @@ func (s *String) CloneInto(target *String) {
 }
 
 func (s *String) Insert(i int, b byte) {
+	s.copycheck()
+
 	if s.len >= s.cap {
 		s.grow(s.cap)
 	}
@@ -132,6 +134,8 @@ func (s *String) Insert(i int, b byte) {
 }
 
 func (s *String) InsertString(i int, str string) {
+	s.copycheck()
+
 	l := len(str)
 
 	if s.len+l >= s.cap {
@@ -144,6 +148,8 @@ func (s *String) InsertString(i int, str string) {
 }
 
 func (s *String) Push(b byte) {
+	s.copycheck()
+
 	if s.len >= s.cap {
 		s.grow(s.cap)
 	}
@@ -153,6 +159,8 @@ func (s *String) Push(b byte) {
 }
 
 func (s *String) PushRune(r rune) {
+	s.copycheck()
+
 	if r < utf8.RuneSelf {
 		s.Push(byte(r))
 		return
@@ -167,6 +175,8 @@ func (s *String) PushRune(r rune) {
 }
 
 func (s *String) PushString(str string) {
+	s.copycheck()
+
 	l := len(str)
 
 	if s.len+l >= s.cap {
@@ -178,6 +188,8 @@ func (s *String) PushString(str string) {
 }
 
 func (s *String) PushBytes(bytes []byte) {
+	s.copycheck()
+
 	l := len(bytes)
 
 	if s.len+l >= s.cap {
@@ -195,6 +207,7 @@ func (s *String) PushRunes(runes []rune) {
 }
 
 func (s *String) Drain(l, r int) {
+	s.copycheck()
 	copy(s.mem[l:s.len], s.mem[r:s.len])
 	s.len -= r - l
 }
@@ -270,6 +283,8 @@ func (s *String) Find(pat string) int {
 }
 
 func (s *String) Replace(from, to string) {
+	s.copycheck()
+
 	oldsl, newsl := stringToBytes(from), stringToBytes(to)
 
 	payload := s.payload()
@@ -321,6 +336,7 @@ func (s *String) ReplaceToNew(from, to string) String {
 
 // TrimSpaceSlow benchmark: 90.12 ns/op
 func (s *String) TrimSpaceSlow() {
+	s.copycheck()
 	tgt := bytes.TrimSpace(s.payload())
 	s.mem = tgt
 	s.len = len(tgt)
@@ -331,6 +347,8 @@ var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
 
 // TrimSpace benchmark: 72.55 ns/op
 func (s *String) TrimSpace() {
+	s.copycheck()
+
 	var start, stop int
 	for ; start < s.len; start++ {
 		c := s.Get(start)
