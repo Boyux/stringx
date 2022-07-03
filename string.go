@@ -57,6 +57,8 @@ func (s *String) copycheck() {
 }
 
 func (s *String) grow(n int) {
+	s.copycheck()
+
 	if n >= math.MaxInt32 {
 		panic("String.grow: n overflows")
 	}
@@ -83,6 +85,8 @@ func (s *String) block() []byte {
 }
 
 func (s *String) trim(f func(r rune) bool) {
+	s.copycheck()
+
 	var start, stop int
 	payload := s.payload()
 

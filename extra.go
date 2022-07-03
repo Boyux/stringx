@@ -279,7 +279,11 @@ func (l List[S]) Join(sep string) *String {
 			var ele any = l[i]
 			n += ele.(interface{ Len() int }).Len()
 		}
-		s.grow(n)
+		s.SetCapacity(n)
+	}
+
+	if !s.alreadyInit() {
+		s.Init()
 	}
 
 	s.PushString(l[0].String())
