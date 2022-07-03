@@ -6,4 +6,4 @@ const (
 	patch = 0
 )
 
-var Version = Format("%d.%d.%d", major, minor, patch)
+var Version = Format("v%d.%d.%d", major, minor, patch)
