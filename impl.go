@@ -5,10 +5,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"unicode"
 	"unicode/utf16"
 	"unicode/utf8"
 )
+
+func (s *String) TryFrom(from any) error {
+	switch src := from.(type) {
+	case bool:
+		s.FromString(strconv.FormatBool(src))
+	case int, int8, int16, int32, int64:
+		s.FromString(strconv.FormatInt(reflect.ValueOf(src).Int(), 10))
+	case uint, uint8, uint16, uint32, uint64:
+		s.FromString(strconv.FormatUint(reflect.ValueOf(src).Uint(), 10))
+	case float32:
+		s.FromString(strconv.FormatFloat(reflect.ValueOf(src).Float(), 'g', -1, 32))
+	case float64:
+		s.FromString(strconv.FormatFloat(src, 'g', -1, 64))
+	case string:
+		s.FromString(src)
+	case []byte:
+		s.FromBytes(src)
+	case []rune:
+		s.FromRunes(src)
+	case fmt.Stringer:
+		s.FromString(src.String())
+	case ToString:
+		s.From(src.ToString())
+	case Initializer[*String]:
+		s.From(src)
+	default:
+		return fmt.Errorf("string: cannot convert type %s to String", reflect.TypeOf(from).String())
+	}
+	return nil
+}
 
 func (s *String) From(ini Initializer[*String]) *String {
 	s.build(nil, 0, 0)
