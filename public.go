@@ -217,15 +217,13 @@ func (s *String) Get(i int) byte {
 	return payload[i]
 }
 
-func (s *String) Index(l, r int) String {
+func (s *String) Index(l, r int) *String {
 	mem := make([]byte, r-l)
 	copy(mem, s.mem[l:r])
 
-	return String{
-		mem: mem,
-		len: r - l,
-		cap: r - l,
-	}
+	var indexed *String
+	indexed.build(mem, r-l, r-l)
+	return indexed
 }
 
 func (s *String) EqualTo(other *String) bool {
@@ -324,23 +322,18 @@ func (s *String) Replace(from, to string) {
 	}
 }
 
-func (s *String) ReplaceToNew(from, to string) String {
+func (s *String) ReplaceToNew(from, to string) *String {
+	var news *String
 	mem := bytes.ReplaceAll(s.payload(), stringToBytes(from), stringToBytes(to))
-
-	return String{
-		mem: mem,
-		len: len(mem),
-		cap: len(mem),
-	}
+	news.build(mem, len(mem), len(mem))
+	return news
 }
 
 // TrimSpaceSlow benchmark: 90.12 ns/op
 func (s *String) TrimSpaceSlow() {
 	s.copycheck()
 	tgt := bytes.TrimSpace(s.payload())
-	s.mem = tgt
-	s.len = len(tgt)
-	s.cap = len(tgt)
+	s.build(tgt, len(tgt), len(tgt))
 }
 
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
