@@ -87,18 +87,14 @@ func (s *String) Scan(src any) error {
 
 	if str, ok := src.(string); ok {
 		mem := stringToBytesSlow(str)
-		s.mem = mem
-		s.len = len(mem)
-		s.cap = len(mem)
+		s.build(mem, len(mem), len(mem))
 		return nil
 	}
 
 	if b, ok := src.([]byte); ok {
 		mem := make([]byte, len(b))
 		copy(mem, b)
-		s.mem = mem
-		s.len = len(mem)
-		s.cap = len(mem)
+		s.build(mem, len(mem), len(mem))
 		return nil
 	}
 
@@ -195,9 +191,7 @@ func (s *String) UnmarshalJSON(src []byte) (err error) {
 			Type:  reflect.TypeOf(s),
 		}
 	}
-	s.mem = dst
-	s.len = len(dst)
-	s.cap = len(dst)
+	s.build(dst, len(dst), len(dst))
 	return nil
 }
 

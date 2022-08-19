@@ -144,7 +144,7 @@ func BenchmarkString_Replace(b *testing.B) {
 }
 
 func BenchmarkString_ReplaceToNew(b *testing.B) {
-	var str String
+	var str *String
 	for i := 0; i < b.N; i++ {
 		for _, data := range replaceData {
 			str.FromString(data[0])
