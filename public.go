@@ -221,9 +221,9 @@ func (s *String) Index(l, r int) *String {
 	mem := make([]byte, r-l)
 	copy(mem, s.mem[l:r])
 
-	var indexed *String
+	var indexed String
 	indexed.build(mem, r-l, r-l)
-	return indexed
+	return &indexed
 }
 
 func (s *String) EqualTo(other *String) bool {
@@ -323,10 +323,10 @@ func (s *String) Replace(from, to string) {
 }
 
 func (s *String) ReplaceToNew(from, to string) *String {
-	var news *String
+	var news String
 	mem := bytes.ReplaceAll(s.payload(), stringToBytes(from), stringToBytes(to))
 	news.build(mem, len(mem), len(mem))
-	return news
+	return &news
 }
 
 // TrimSpaceSlow benchmark: 90.12 ns/op
