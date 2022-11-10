@@ -28,7 +28,7 @@ func (s *String) SetCapacity(capacity int) {
 	}
 }
 
-func (s *String) FromString(in string) {
+func (s *String) FromString(in string) *String {
 	if s.alreadyInit() {
 		s.Reset()
 		s.PushString(in)
@@ -50,9 +50,10 @@ func (s *String) FromString(in string) {
 			len(mem),
 		)
 	}
+	return s
 }
 
-func (s *String) FromBytes(in []byte) {
+func (s *String) FromBytes(in []byte) *String {
 	if s.alreadyInit() {
 		s.Reset()
 		s.PushBytes(in)
@@ -61,9 +62,10 @@ func (s *String) FromBytes(in []byte) {
 		copy(mem, in)
 		s.build(mem, len(mem), len(mem))
 	}
+	return s
 }
 
-func (s *String) FromRunes(in []rune) {
+func (s *String) FromRunes(in []rune) *String {
 	if s.alreadyInit() {
 		s.Reset()
 		s.PushRunes(in)
@@ -77,6 +79,7 @@ func (s *String) FromRunes(in []rune) {
 
 		s.build(mem, n, len(mem))
 	}
+	return s
 }
 
 func (s *String) Bytes() []byte {
