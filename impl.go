@@ -1,7 +1,8 @@
-package strmut
+package stringx
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -99,6 +100,10 @@ func (s *String) Scan(src any) error {
 	}
 
 	return fmt.Errorf("sql: cannot assign type %s to String", reflect.TypeOf(src).String())
+}
+
+func (s *String) Value() (driver.Value, error) {
+	return s.toString(), nil
 }
 
 func (s *String) MarshalJSON() ([]byte, error) {

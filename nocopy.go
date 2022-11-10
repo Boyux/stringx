@@ -1,4 +1,4 @@
-package strmut
+package stringx
 
 type nocopy struct{}
 

@@ -1,4 +1,4 @@
-package strmut
+package stringx
 
 import "math/rand"
 

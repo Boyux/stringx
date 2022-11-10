@@ -1,6 +1,6 @@
 //go:build unsafe_convert
 
-package strmut
+package stringx
 
 import (
 	"reflect"

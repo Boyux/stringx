@@ -1,3 +1,3 @@
-module github.com/Boyux/strmut
+module github.com/Boyux/stringx
 
 go 1.18

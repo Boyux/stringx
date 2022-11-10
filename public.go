@@ -1,4 +1,4 @@
-package strmut
+package stringx
 
 import (
 	"bytes"
@@ -6,6 +6,12 @@ import (
 	"unicode"
 	"unicode/utf8"
 )
+
+func New() *String {
+	s := new(String)
+	s.Init()
+	return s
+}
 
 func (s *String) Init() {
 	s.assumeUninit()
