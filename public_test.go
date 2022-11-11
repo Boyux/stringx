@@ -144,7 +144,7 @@ func BenchmarkString_Replace(b *testing.B) {
 }
 
 func BenchmarkString_ReplaceToNew(b *testing.B) {
-	var str *String
+	str := New()
 	for i := 0; i < b.N; i++ {
 		for _, data := range replaceData {
 			str.FromString(data[0])
@@ -159,6 +159,78 @@ func BenchmarkStdReplace(b *testing.B) {
 		for _, data := range replaceData {
 			str, from, to := data[0], data[1], data[2]
 			str = strings.ReplaceAll(str, from, to)
+		}
+	}
+}
+
+var trimPrefixData = [][]string{
+	{"abc123", "abc"},
+	{"🐱🐶", "🐱"},
+}
+
+func TestString_TrimPrefix(t *testing.T) {
+	for _, data := range trimPrefixData {
+		after, exp := New().
+			FromString(data[0]).
+			TrimPrefix(data[1]), strings.TrimPrefix(data[0], data[1])
+		if !after.EqualToString(exp) {
+			t.Errorf("String: triming prefix failed: before=%s after=%s expect=%s",
+				data[0], after.UnsafeString(), exp)
+		}
+	}
+}
+
+func BenchmarkString_TrimPrefix(b *testing.B) {
+	str := New()
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimPrefixData {
+			str.
+				FromString(data[0]).
+				TrimPrefix(data[1])
+		}
+	}
+}
+
+func BenchmarkStdTrimPrefix(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimPrefixData {
+			strings.TrimPrefix(data[0], data[1])
+		}
+	}
+}
+
+var trimSuffixData = [][]string{
+	{"abc123", "123"},
+	{"🐶🐱", "🐱"},
+}
+
+func BenchmarkString_TrimSuffix(b *testing.B) {
+	str := New()
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimSuffixData {
+			str.
+				FromString(data[0]).
+				TrimSuffix(data[1])
+		}
+	}
+}
+
+func BenchmarkStdTrimSuffix(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, data := range trimSuffixData {
+			strings.TrimSuffix(data[0], data[1])
+		}
+	}
+}
+
+func TestString_TrimSuffix(t *testing.T) {
+	for _, data := range trimSuffixData {
+		after, exp := New().
+			FromString(data[0]).
+			TrimSuffix(data[1]), strings.TrimSuffix(data[0], data[1])
+		if !after.EqualToString(exp) {
+			t.Errorf("String: triming suffix failed: before=%s after=%s expect=%s",
+				data[0], after.UnsafeString(), exp)
 		}
 	}
 }
@@ -324,6 +396,70 @@ func TestString_ToLower(t *testing.T) {
 		if !s.EqualToString(expect) {
 			t.Errorf("String: to lower failed: before=%s after=%s expect=%s",
 				before.String(), s.String(), expect)
+		}
+	}
+}
+
+func BenchmarkString_ToUpper(b *testing.B) {
+	s := New()
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < 100; j++ {
+			s.FromString(random(10)).
+				ToUpper()
+		}
+	}
+}
+
+func BenchmarkStdToUpper(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < 100; j++ {
+			strings.ToUpper(random(10))
+		}
+	}
+}
+
+func BenchmarkString_ToLower(b *testing.B) {
+	s := New()
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < 100; j++ {
+			s.FromString(random(10)).
+				ToLower()
+		}
+	}
+}
+
+func BenchmarkStdToLower(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < 100; j++ {
+			strings.ToLower(random(10))
+		}
+	}
+}
+
+func BenchmarkString_PushString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s := New()
+		s.SetCapacity(100 * 10)
+		for j := 0; j < 100; j++ {
+			s.PushString(random(10))
+		}
+	}
+}
+
+func BenchmarkStdPushString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s := ""
+		for j := 0; j < 100; j++ {
+			s += random(10)
+		}
+	}
+}
+
+func BenchmarkStdStringBuilderPushString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s := new(strings.Builder)
+		for j := 0; j < 100; j++ {
+			s.WriteString(random(10))
 		}
 	}
 }

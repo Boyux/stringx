@@ -268,9 +268,17 @@ func (s *String) StartsWith(pat string) bool {
 	return s.len >= len(pat) && bytes.Equal(s.mem[0:len(b)], b)
 }
 
+func (s *String) HasPrefix(pat string) bool {
+	return s.StartsWith(pat)
+}
+
 func (s *String) EndsWith(pat string) bool {
 	b := stringToBytes(pat)
 	return s.len >= len(pat) && bytes.Equal(s.mem[s.len-len(b):s.len], b)
+}
+
+func (s *String) HasSuffix(pat string) bool {
+	return s.EndsWith(pat)
 }
 
 func (s *String) Split(sep string) *Split {
@@ -320,12 +328,12 @@ func (s *String) Replace(from, to string) {
 		s.grow(size)
 	}
 
-	block := s.block()
+	mem := s.mem
 	var offset int
 	for _, point = range points {
 		loc := point + offset
-		copy(block[loc+len(newsl):s.len+len(newsl)-len(oldsl)], block[loc+len(oldsl):s.len])
-		copy(block[loc:loc+len(newsl)], newsl)
+		copy(mem[loc+len(newsl):s.len+len(newsl)-len(oldsl)], mem[loc+len(oldsl):s.len])
+		copy(mem[loc:loc+len(newsl)], newsl)
 		offset += len(newsl) - len(oldsl)
 		s.len += len(newsl) - len(oldsl)
 	}
@@ -336,6 +344,21 @@ func (s *String) ReplaceToNew(from, to string) *String {
 	mem := bytes.ReplaceAll(s.payload(), stringToBytes(from), stringToBytes(to))
 	news.build(mem, len(mem), len(mem))
 	return &news
+}
+
+func (s *String) TrimPrefix(pat string) *String {
+	if s.HasPrefix(pat) {
+		copy(s.mem, s.mem[len(pat):])
+		s.len -= len(pat)
+	}
+	return s
+}
+
+func (s *String) TrimSuffix(pat string) *String {
+	if s.HasSuffix(pat) {
+		s.len -= len(pat)
+	}
+	return s
 }
 
 // TrimSpaceSlow benchmark: 90.12 ns/op

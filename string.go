@@ -80,10 +80,6 @@ func (s *String) payload() []byte {
 	return s.mem[0:s.len]
 }
 
-func (s *String) block() []byte {
-	return s.mem
-}
-
 func (s *String) trim(f func(r rune) bool) {
 	s.copycheck()
 
