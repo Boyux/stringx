@@ -3,14 +3,29 @@ package stringx
 import (
 	"bytes"
 	"strconv"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 )
 
+var mem = sync.Pool{
+	New: func() any {
+		return new(String)
+	},
+}
+
 func New() *String {
-	s := new(String)
-	s.Init()
+	s := mem.Get().(*String)
+	if s.alreadyInit() {
+		s.Reset()
+	} else {
+		s.Init()
+	}
 	return s
+}
+
+func (s *String) Recycle() {
+	mem.Put(s)
 }
 
 func (s *String) Init() {
