@@ -8,14 +8,14 @@ import (
 	"unicode/utf8"
 )
 
-var mem = sync.Pool{
+var alloc = sync.Pool{
 	New: func() any {
 		return new(String)
 	},
 }
 
 func New() *String {
-	s := mem.Get().(*String)
+	s := alloc.Get().(*String)
 	if s.alreadyInit() {
 		s.Reset()
 	} else {
@@ -25,7 +25,7 @@ func New() *String {
 }
 
 func (s *String) Recycle() {
-	mem.Put(s)
+	alloc.Put(s)
 }
 
 func (s *String) Init() {

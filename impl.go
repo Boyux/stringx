@@ -15,15 +15,25 @@ import (
 func (s *String) TryFrom(from any) error {
 	switch src := from.(type) {
 	case bool:
-		s.FromString(strconv.FormatBool(src))
+		s.mem = strconv.AppendBool(s.payload(), src)
+		s.len = len(s.mem)
+		s.cap = len(s.mem)
 	case int, int8, int16, int32, int64:
-		s.FromString(strconv.FormatInt(reflect.ValueOf(src).Int(), 10))
+		s.mem = strconv.AppendInt(s.payload(), reflect.ValueOf(src).Int(), 10)
+		s.len = len(s.mem)
+		s.cap = len(s.mem)
 	case uint, uint8, uint16, uint32, uint64:
-		s.FromString(strconv.FormatUint(reflect.ValueOf(src).Uint(), 10))
+		s.mem = strconv.AppendUint(s.payload(), reflect.ValueOf(src).Uint(), 10)
+		s.len = len(s.mem)
+		s.cap = len(s.mem)
 	case float32:
-		s.FromString(strconv.FormatFloat(reflect.ValueOf(src).Float(), 'g', -1, 32))
+		s.mem = strconv.AppendFloat(s.payload(), reflect.ValueOf(src).Float(), 'g', -1, 32)
+		s.len = len(s.mem)
+		s.cap = len(s.mem)
 	case float64:
-		s.FromString(strconv.FormatFloat(src, 'g', -1, 64))
+		s.mem = strconv.AppendFloat(s.payload(), src, 'g', -1, 64)
+		s.len = len(s.mem)
+		s.cap = len(s.mem)
 	case string:
 		s.FromString(src)
 	case []byte:
