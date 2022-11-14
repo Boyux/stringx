@@ -47,7 +47,7 @@ func (s *String) TryFrom(from any) error {
 	case Initializer[*String]:
 		s.From(src)
 	default:
-		return fmt.Errorf("string: cannot convert type %s to String", reflect.TypeOf(from).String())
+		return fmt.Errorf("stringx: cannot convert type %s to String", reflect.TypeOf(from).String())
 	}
 	return nil
 }
@@ -92,8 +92,7 @@ func (s *String) Write(p []byte) (n int, err error) {
 
 func (s *String) Scan(src any) error {
 	if src == nil {
-		s.len = 0
-		return nil
+		return fmt.Errorf("stringx: cannot assign `NULL` value to String")
 	}
 
 	if str, ok := src.(string); ok {
@@ -109,7 +108,7 @@ func (s *String) Scan(src any) error {
 		return nil
 	}
 
-	return fmt.Errorf("sql: cannot assign type %s to String", reflect.TypeOf(src).String())
+	return fmt.Errorf("stringx: cannot assign type %s to String", reflect.TypeOf(src).String())
 }
 
 func (s *String) Value() (driver.Value, error) {
