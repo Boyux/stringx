@@ -17,13 +17,16 @@ var _ Iterator[*String] = (*Lines)(nil)
 type Lines struct {
 	mem []byte
 	idx int
+	val *String
 }
 
-func (l *Lines) Next() bool {
-	return l.idx < len(l.mem)
+func (l *Lines) Next() (hasNext bool) {
+	hasNext = l.idx < len(l.mem)
+	l.val = l.value()
+	return hasNext
 }
 
-func (l *Lines) Value() *String {
+func (l *Lines) value() *String {
 	dropCR := func(data []byte) []byte {
 		if len(data) > 0 && data[len(data)-1] == '\r' {
 			return data[0 : len(data)-1]
@@ -47,37 +50,49 @@ func (l *Lines) Value() *String {
 	return &next
 }
 
+func (l *Lines) Value() *String {
+	return l.val
+}
+
 var _ Iterator[rune] = (*Runes)(nil)
 
 type Runes struct {
 	mem []byte
 	idx int
+	val rune
 }
 
-func (r *Runes) Next() bool {
-	return r.idx < len(r.mem)
+func (r *Runes) Next() (hasNext bool) {
+	hasNext = r.idx < len(r.mem)
+	r.val = r.value()
+	return hasNext
 }
 
-func (r *Runes) Value() rune {
+func (r *Runes) value() rune {
 	next, n := utf8.DecodeRune(r.mem[r.idx:])
 	r.idx += n
 	return next
 }
 
+func (r *Runes) Value() rune {
+	return r.val
+}
+
 func (r *Runes) Nth(i int) rune {
 	for j := 0; j < i; j++ {
-		_ = r.Value()
+		r.Next()
 	}
-
 	return r.Value()
 }
 
-func (r *Runes) Size() int {
-	return utf8.RuneCount(r.mem[r.idx:])
+func (r *Runes) Size() (i int) {
+	for i = 0; r.Next(); i++ {
+	}
+	return i
 }
 
 func (r *Runes) Consume() []rune {
-	slice := make([]rune, 0, r.Size())
+	slice := make([]rune, 0)
 
 	for r.Next() {
 		slice = append(slice, r.Value())
@@ -96,24 +111,33 @@ func (r *Runes) Reverse() *ReverseRunes {
 type ReverseRunes struct {
 	runes *Runes
 	last  int
+	val   rune
 }
 
-func (r *ReverseRunes) Next() bool {
-	return r.runes.idx < r.last
+func (r *ReverseRunes) Next() (hasNext bool) {
+	hasNext = r.runes.idx < r.last
+	r.val = r.value()
+	return hasNext
 }
 
-func (r *ReverseRunes) Value() rune {
+func (r *ReverseRunes) value() rune {
 	next, n := utf8.DecodeLastRune(r.runes.mem[r.runes.idx:r.last])
 	r.last -= n
 	return next
 }
 
-func (r *ReverseRunes) Size() int {
-	return utf8.RuneCount(r.runes.mem[r.runes.idx:r.last])
+func (r *ReverseRunes) Value() rune {
+	return r.val
+}
+
+func (r *ReverseRunes) Size() (i int) {
+	for i = 0; r.Next(); i++ {
+	}
+	return i
 }
 
 func (r *ReverseRunes) Consume() []rune {
-	slice := make([]rune, 0, r.Size())
+	slice := make([]rune, 0)
 
 	for r.Next() {
 		slice = append(slice, r.Value())
@@ -128,13 +152,16 @@ type Split struct {
 	mem []byte
 	idx int
 	sep []byte
+	val *String
 }
 
-func (s *Split) Next() bool {
-	return s.idx < len(s.mem)
+func (s *Split) Next() (hasNext bool) {
+	hasNext = s.idx < len(s.mem)
+	s.val = s.value()
+	return hasNext
 }
 
-func (s *Split) Value() *String {
+func (s *Split) value() *String {
 	var next String
 
 	loc := bytes.Index(s.mem[s.idx:], s.sep)
@@ -151,12 +178,18 @@ func (s *Split) Value() *String {
 	return &next
 }
 
-func (s *Split) Size() int {
-	return bytes.Count(s.mem[s.idx:], s.sep)
+func (s *Split) Value() *String {
+	return s.val
+}
+
+func (s *Split) Size() (i int) {
+	for i = 0; s.Next(); i++ {
+	}
+	return i
 }
 
 func (s *Split) Consume() []*String {
-	slice := make([]*String, 0, s.Size())
+	slice := make([]*String, 0)
 
 	for s.Next() {
 		slice = append(slice, s.Value())
