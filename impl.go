@@ -78,7 +78,7 @@ func (s *String) ToString() *String {
 // Error transform *String as an error, however, this method make IDE like Goland
 // unhappy because all errors should be handled, so code like
 // 		var s String
-// 		s.From(StringInitialier("init"))
+// 		s.From(StringInitializer("init"))
 // would cause warning messages, so remove it temporary.
 // uncomment codes below to enable Error method
 // func (s *String) Error() string {
@@ -97,14 +97,12 @@ func (s *String) Scan(src any) error {
 
 	if str, ok := src.(string); ok {
 		mem := stringToBytesSlow(str)
-		s.build(mem, len(mem), len(mem))
+		s.FromBytes(mem)
 		return nil
 	}
 
 	if b, ok := src.([]byte); ok {
-		mem := make([]byte, len(b))
-		copy(mem, b)
-		s.build(mem, len(mem), len(mem))
+		s.FromBytes(b)
 		return nil
 	}
 
@@ -198,14 +196,14 @@ func encodeJSON(s []byte) []byte {
 }
 
 func (s *String) UnmarshalJSON(src []byte) (err error) {
-	dst, ok := unquoteBytes(src)
+	unquote, ok := unquoteBytes(src)
 	if !ok {
 		return &json.UnmarshalTypeError{
 			Value: "string",
 			Type:  reflect.TypeOf(s),
 		}
 	}
-	s.build(dst, len(dst), len(dst))
+	s.FromBytes(unquote)
 	return nil
 }
 
